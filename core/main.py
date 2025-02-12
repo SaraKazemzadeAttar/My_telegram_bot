@@ -105,13 +105,10 @@ def check_hello(message):
     return message.text == "hello"
 
 @bot.message_handler(func = check_hello)
+@bot.message_handler(func=lambda msg: msg.text in ["سلام", "👋","❤️"]) 
 def handle_text_doc(message):   
 	bot.reply_to(message, "hello my friend")
 
-@bot.message_handler(commands=['I love you'])
-@bot.message_handler(func=lambda msg: msg.text == "❤️") 
-def send_something(message):
-    bot.reply_to(message, "I love you too")
 
 @bot.edited_message_handler(func = lambda msg: True)
 def trigger_edited(message):
