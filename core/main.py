@@ -13,16 +13,35 @@ telebot.logger.setLevel(logging.INFO)
 API_TOKEN = os.environ.get("API_TOKEN")
 bot = telebot.TeleBot(API_TOKEN)
 
+# sequence with inline keyboard
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
+def send_welcome(message, from_start=True):
     logger.info("triggered Welcome")
-    markup = ReplyKeyboardMarkup(resize_keyboard=True , input_field_placeholder= "انتخاب کن", one_time_keyboard=True)
-    markup.add(KeyboardButton('/help') , KeyboardButton('/setname')) # horizental
-    # or:
+    markup = ReplyKeyboardMarkup(
+        resize_keyboard=True, 
+        input_field_placeholder="انتخاب کن", 
+        one_time_keyboard=True
+    )
+    markup.add(KeyboardButton('/help'), KeyboardButton('/setname'))  # افقی
     markup.add(KeyboardButton('Send Audio or Docs'))
     markup.add(KeyboardButton('/Connect_Me'))
-    bot.send_message(message.chat.id ,"سلام ! ❤️چه کمکی میتونم بهت بکنم؟ ", reply_markup=markup)
+    
+    if from_start:
+        bot.send_message(
+            message.chat.id, 
+            "سلام ! ❤️چه کمکی میتونم بهت بکنم؟", 
+            reply_markup=markup
+        )
+    else:
+        bot.send_message(
+            message.chat.id, 
+            "بازگشت به منوی اصلی 📋", 
+            reply_markup=markup
+        )
+
+@bot.message_handler(commands=['start'])
+def start_command(message):
+    send_welcome(message, from_start=True)
     
 @bot.message_handler(func = lambda message: message.text == "Send Audio or Docs")
 def message_for_audio_docs(message):
@@ -34,12 +53,26 @@ def connect_me(message):
     markup = InlineKeyboardMarkup()
     button_linkedin = InlineKeyboardButton("linkedin",url = "https://www.linkedin.com/in/sara-kazemzade-attar")
     button_github = InlineKeyboardButton("github",url = "https://github.com/SaraKazemzadeAttar")
-    button_quit = InlineKeyboardButton("quit",callback_data = "quit")
+    button_next_step = InlineKeyboardButton("More Options", callback_data="step1")
     markup.add(button_linkedin , button_github)
-    bot.send_message(message.chat.id , "میتونی صفحه من رو توی گیت هاب و لینکدین ببینی",reply_markup = markup)
+    markup.add(button_next_step)
+    bot.reply_to(message, "میتونی صفحه من رو توی گیت هاب و لینکدین ببینی", reply_markup=markup)
     
+@bot.callback_query_handler(func= lambda call:True)
+def reply_call(call):
+    if call.data == "step1" :
+        markup = InlineKeyboardMarkup()
+        button_webpage = InlineKeyboardButton("Quera" , url = "https://quera.org/profile/Sara_kazemzade612")
+        button_cancell = InlineKeyboardButton("بازگشت به منوی اصلی" , callback_data ="main_menu")
+        markup.add(button_webpage)
+        markup.add(button_cancell)
+        bot.edit_message_text(chat_id= call.message.chat.id , message_id= call.message.id , text= " آدرس صفحه من در quera " , reply_markup = markup) 
 
+    if call.data == "main_menu":
+        send_welcome(call.message, from_start=False)
+        bot.delete_message(chat_id= call.message.chat.id , message_id= call.message.id , timeout = 20)
 
+        
 @bot.message_handler(commands=['help'])
 def send_help(message):
     help_text = """🌟 **راهنمای ربات** 🌟
@@ -47,15 +80,6 @@ def send_help(message):
 سلام دوست عزیز! 👋 
 این اولین رباتیه که من برای آموزش دیدن راه اندازی کردم  🛠️  
 
-📌 **دستورات قابل استفاده:**  
-✅ `/start` - شروع و خوشامدگویی  
-✅ `/help` - دریافت راهنمای ربات  
-✅ ارسال **"hello"**  
-✅ ارسال **"❤️"**   
-✅ ارسال کلمه **"سارا"**   
-
-📂 **پشتیبانی از فایل‌ها و صداها:**  
-🤖❤️  
     """
     bot.reply_to(message, help_text)
 
@@ -127,9 +151,6 @@ def modify_message(bot_instance , message):
 def reply_modified(message):
     bot.reply_to(message,message.another_text)
     
-
-
-
 
 # listener with server 
 bot.infinity_polling()
