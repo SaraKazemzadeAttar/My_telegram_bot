@@ -6,7 +6,7 @@ import json
 from telebot import apihelper
 import logging
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton , InlineKeyboardMarkup , InlineKeyboardButton
-from handlers import send_files_management
+from handlers import send_files_management , inline_query_handler , send_text_with_md_or_html_format
 import importlib
 import importlib.util
 import sys

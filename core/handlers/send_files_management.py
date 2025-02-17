@@ -1,6 +1,6 @@
 import telebot
 import logging
-
+from telebot.types import  InlineKeyboardMarkup , InlineKeyboardButton
 
 def register(bot):
     @bot.message_handler(commands=['send_voice'])
@@ -27,3 +27,18 @@ def register(bot):
             bot.send_chat_action(message.chat.id , action ="upload_photo")
             bot.send_document(chat_id=message.chat.id,  document=photo_file)
             bot.send_photo(chat_id=message.chat.id,photo = photo_file)
+    
+    # if user upload a photo , the bot send photo again with a caption 
+    def send_photo_file(message):
+        FILE_ID = "AgACAgQAAxkBAAIBqmexBOjoicSl1T0Gz-Z44ua-ut8MAAKKyjEbUBSJUfirODec8kgQAQADAgADeAADNgQ"
+        markup = InlineKeyboardMarkup()
+        like_Btn = InlineKeyboardButton("👍" , callback_data = "like")
+        dislike_Btn = InlineKeyboardButton("👎",callback_data = "dislike")
+        markup.add(like_Btn, dislike_Btn) 
+        bot.send_photo(message.chat.id,FILE_ID , caption= "این عکس اپلود شد", reply_markup = markup)
+            
+    @bot.message_handler(content_types=["photo" , "video", "document" , "audio" , "voice"])
+    def check_id(message):
+        # telebot.logger.info(message.__dict__)
+        send_photo_file(message)
+        # we need the last file id in json
