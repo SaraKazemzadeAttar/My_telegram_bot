@@ -6,7 +6,7 @@ import json
 from telebot import apihelper
 import logging
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton , InlineKeyboardMarkup , InlineKeyboardButton
-from handlers import send_files_management , inline_query_handler , send_text_with_md_or_html_format
+from handlers import send_files_management , inline_query_handler , send_text_with_md_or_html_format , group_admin , channel_admin
 import importlib
 import importlib.util
 import sys
@@ -31,8 +31,8 @@ for file in os.listdir(handlers_dir):
         spec.loader.exec_module(module)
         if hasattr(module, 'register'):
             module.register(bot)
+            
 # sequence with inline keyboard
-
 def send_welcome(message, from_start=True):
     logger.info("triggered Welcome")
     markup = ReplyKeyboardMarkup(
@@ -157,17 +157,17 @@ def trigger_edited(message):
     bot.reply_to(message, "اگر پیام خود را edit کرده ای لطفا دوباره ارسال کن")
     
     
-@bot.middleware_handler(update_types =['message'])
-def modify_message(bot_instance , message):
-    # print(bot_instance.__dict__) # information about bot 
-    if message.text is None:
-        message.another_text = "No text received."
-    else:
-        message.another_text = message.text + "  ,You said "
+# @bot.middleware_handler(update_types =['message'])
+# def modify_message(bot_instance , message):
+#     # print(bot_instance.__dict__) # information about bot 
+#     if message.text is None:
+#         message.another_text = "No text received."
+#     else:
+#         message.another_text = message.text + "  ,You said "
     
-@bot.message_handler(func = lambda message :True)
-def reply_modified(message):
-    bot.reply_to(message,message.another_text)
+# @bot.message_handler(func = lambda message :True)
+# def reply_modified(message):
+#     bot.reply_to(message,message.another_text)
     
 
 # listener with server 
